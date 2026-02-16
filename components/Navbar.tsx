@@ -2,14 +2,19 @@ import { Box } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Button from './ui/Button';
 
-const Navbar = () => {
+interface NavbarProps {
+  isSignedIn?: boolean;
+  username?: string;
+  onAuthClick?: () => void;
+}
+
+const Navbar = ({ isSignedIn = false, username = 'Sipha', onAuthClick }: NavbarProps) => {
   const { t } = useTranslation();
 
-  const isSignedIn = false;
-  const username = 'Sipha';
-
   const handleAuthClick = async () => {
-    // Handle authentication logic here
+    if (onAuthClick) {
+      onAuthClick();
+    }
   };
 
   return (

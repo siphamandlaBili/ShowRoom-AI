@@ -1,27 +1,22 @@
-const { createDefaultPreset } = require("ts-jest");
-
-const tsJestTransformCfg = createDefaultPreset().transform;
-
-/** @type {import("jest").Config} **/
+/** @type {import("jest").Config} */
 module.exports = {
   testEnvironment: "jsdom",
 
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", {
-      tsconfig: "tsconfig.jest.json"
-    }],
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.jest.json",
+      },
+    ],
   },
 
-  // ✅ Enable coverage collection
-  collectCoverage: true,
-
-  // ✅ Where coverage reports go
+  // Coverage collection disabled by default, enabled with --coverage flag
+  collectCoverage: false,
   coverageDirectory: "coverage",
-
-  // ✅ Report formats
   coverageReporters: ["text", "lcov", "html"],
 
-  // ✅ Files to include in coverage
+  // Files to include in coverage analysis
   collectCoverageFrom: [
     "components/**/*.{ts,tsx}",
     "!components/**/*.test.{ts,tsx}",
@@ -29,11 +24,18 @@ module.exports = {
     "!**/*.d.ts",
   ],
 
-  // ✅ Test file patterns
-  testMatch: [
-    "**/__tests__/**/*.test.{ts,tsx}",
-    "**/*.test.{ts,tsx}",
-  ],
+  // Test file patterns
+  testMatch: ["**/__tests__/**/*.test.{ts,tsx}", "**/*.test.{ts,tsx}"],
+
+  // Enforce minimum coverage thresholds
+  coverageThreshold: {
+    global: {
+      statements: 85,
+      branches: 85,
+      functions: 85,
+      lines: 85,
+    },
+  },
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.cjs"],
 };
