@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface ButtonProps {
   text: string;
   onClick?: () => void;
@@ -15,13 +13,13 @@ const Button = ({
   variant = 'default',
   type = 'button',
   className = '',
-  disabled = false
+  disabled = false,
 }: ButtonProps) => {
   const variantClasses = {
     default: 'btn-default',
     ghost: 'login',
     outline: 'btn-outline',
-    cta: 'cta'
+    cta: 'cta',
   };
 
   const baseClass = variantClasses[variant] || variantClasses.default;
@@ -43,7 +41,7 @@ const Button = ({
     >
       {text}
     </button>
-  )
-}
+  );
+};
 
-export default Button
+export default Button;

@@ -1,0 +1,12 @@
+{
+  "navbar": {
+    "brand": "ShowRoom",
+    "product": "Product",
+    "pricing": "Pricing",
+    "community": "Community",
+    "greeting": "Hi, {{username}}",
+    "login": "Log in",
+    "logout": "Log out",
+    "getStarted": "Get Started"
+  }
+}
