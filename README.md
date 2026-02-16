@@ -45,3 +45,41 @@ Built as a scalable SaaS application, it demonstrates real-world architecture fo
 - Download render outputs
 - Presentation-ready visuals
 - Portfolio-ready exports
+
+---
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running Locally
+
+```bash
+npm run dev
+```
+
+### Pre-commit Hooks
+
+This project uses **Husky** and **lint-staged** to maintain code quality:
+
+✅ **Automatic formatting** with Prettier  
+✅ **Lint checks** with ESLint  
+✅ **Unused variable/import detection** - commits are blocked if found  
+
+The pre-commit hook runs automatically on every commit and:
+- Formats all staged `.js`, `.jsx`, `.ts`, `.tsx`, `.json`, `.css`, and `.md` files
+- Checks TypeScript/JavaScript files for unused variables and imports
+- Prevents commits with linting errors
+
+**Configuration:**
+- Pre-commit script: `.husky/pre-commit`
+- Staged file tasks: `lint-staged` in `package.json`
+- ESLint rules: `eslint.config.js`
