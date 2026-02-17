@@ -12,6 +12,7 @@
     "coverage": "jest --coverage"
   },
   "dependencies": {
+    "@heyputer/puter.js": "^2.2.10",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
     "i18next": "^25.8.10",
