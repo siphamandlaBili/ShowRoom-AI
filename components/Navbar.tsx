@@ -1,19 +1,27 @@
 import { Box } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useOutletContext } from 'react-router';
+import type { AuthContext } from '../app/root';
 import Button from './ui/Button';
 
-interface NavbarProps {
-  isSignedIn?: boolean;
-  username?: string;
-  onAuthClick?: () => void;
-}
-
-const Navbar = ({ isSignedIn = false, username = 'Sipha', onAuthClick }: NavbarProps) => {
+const Navbar = () => {
   const { t } = useTranslation();
 
+  const { isSignedIn, username, signIn, signOut } = useOutletContext<AuthContext>();
+
   const handleAuthClick = async () => {
-    if (onAuthClick) {
-      onAuthClick();
+    if (isSignedIn) {
+      try {
+        await signOut();
+      } catch (error) {
+        console.error('Sign out error:', error);
+      }
+    } else {
+      try {
+        await signIn();
+      } catch (error) {
+        console.error('Sign in error:', error);
+      }
     }
   };
 
