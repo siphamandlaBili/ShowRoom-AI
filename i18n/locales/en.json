@@ -7,6 +7,10 @@
     "greeting": "Hi, {{username}}",
     "login": "Log in",
     "logout": "Log out",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "signInSuccess": "Successfully signed in!",
+    "signInError": "Failed to sign in. Please try again.",
+    "signOutSuccess": "Successfully signed out!",
+    "signOutError": "Failed to sign out. Please try again."
   }
 }

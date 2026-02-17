@@ -1,4 +1,5 @@
 import { Box } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import type { AuthContext } from '../app/root';
@@ -13,14 +14,15 @@ const Navbar = () => {
     if (isSignedIn) {
       try {
         await signOut();
-      } catch (error) {
-        console.error('Sign out error:', error);
+        toast.success(t('navbar.signOutSuccess'));
+      } catch {
+        toast.error(t('navbar.signOutError'));
       }
     } else {
       try {
         await signIn();
-      } catch (error) {
-        console.error('Sign in error:', error);
+      } catch {
+        toast.error(t('navbar.signInError'));
       }
     }
   };
