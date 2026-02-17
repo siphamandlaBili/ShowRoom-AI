@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Toaster } from 'react-hot-toast';
 import {
   isRouteErrorResponse,
   Links,
@@ -49,6 +50,7 @@ export function Layout({ children }: { readonly children: ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster position="top-right" />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -76,8 +78,7 @@ export default function App() {
       });
 
       return !!user;
-    } catch (error) {
-      console.log('Error refreshing auth:', error);
+    } catch {
       setAuthState(DEFAULT_AUTH_STATE);
       return false;
     }
