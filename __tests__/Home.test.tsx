@@ -87,10 +87,14 @@ describe('Home route', () => {
     expect(title).not.toBeNull();
     expect(uploadShell).not.toBeNull();
 
-    fireEvent.mouseMove(title as Element, { clientX: 100, clientY: 100 });
-    fireEvent.mouseLeave(title as Element);
-    fireEvent.mouseMove(uploadShell as Element, { clientX: 150, clientY: 110 });
-    fireEvent.mouseLeave(uploadShell as Element);
+    if (!title || !uploadShell) {
+      throw new Error('Expected hero title and upload shell elements to exist');
+    }
+
+    fireEvent.mouseMove(title, { clientX: 100, clientY: 100 });
+    fireEvent.mouseLeave(title);
+    fireEvent.mouseMove(uploadShell, { clientX: 150, clientY: 110 });
+    fireEvent.mouseLeave(uploadShell);
 
     expect(gsap.registerPlugin).toHaveBeenCalledWith(ScrollTrigger);
     expect(gsap.quickTo).toHaveBeenCalled();
