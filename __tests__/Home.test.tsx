@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { gsap } from 'gsap';
+import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Home from '../app/routes/home';
 
@@ -38,7 +38,8 @@ jest.mock('lucide-react', () => ({
 }));
 
 jest.mock('gsap', () => ({
-  gsap: {
+  __esModule: true,
+  default: {
     registerPlugin: jest.fn(),
     context: jest.fn((callback: () => void) => {
       callback();
