@@ -3,10 +3,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ArrowUpRight, Clock, Layers } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Route } from './+types/home';
 import Navbar from 'components/Navbar';
 
-export function meta(_: Route.MetaArgs) {
+export function meta() {
   return [
     { title: 'New React Router App' },
     { name: 'description', content: 'Welcome to React Router!' },
