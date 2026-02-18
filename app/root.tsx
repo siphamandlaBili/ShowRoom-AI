@@ -94,7 +94,7 @@ export default function App() {
   };
 
   const signOut = async () => {
-    await puterSignOut();
+    puterSignOut();
     return refreshAuth();
   };
 

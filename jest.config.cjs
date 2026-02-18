@@ -27,6 +27,10 @@ module.exports = {
   // Test file patterns
   testMatch: ["**/__tests__/**/*.test.{ts,tsx}", "**/*.test.{ts,tsx}"],
 
+  moduleNameMapper: {
+    '^components/(.*)$': '<rootDir>/components/$1',
+  },
+
   // Enforce minimum coverage thresholds
   coverageThreshold: {
     global: {

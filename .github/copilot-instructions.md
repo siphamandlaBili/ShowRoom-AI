@@ -119,3 +119,8 @@ If this project is JavaScript-only:
 ---
 
 If unsure, generate the most maintainable and readable solution.
+
+## Localisation
+
+- Use i18n libraries if the project is multilingual, keeping content separate from logic.
+- Use keys for translations, not hardcoded strings.

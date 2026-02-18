@@ -12,5 +12,19 @@
     "signInError": "Failed to sign in. Please try again.",
     "signOutSuccess": "Successfully signed out!",
     "signOutError": "Failed to sign out. Please try again."
+  },
+  "hero": {
+    "subtitle": "ShowRoom is an AI-first design environment that helps you visualise,render, and ship architectural projects faster than ever",
+    "getStarted": "Get Started",
+    "title": "Build beautiful spaces at the speed of thought with ShowRoom",
+    "introducing": "Introducing ShowRoom 1.0",
+    "upload": "Upload your floor plan",
+    "uploadDescription": "Supports JPG, PNG, formats up to 10MB",
+    "uploadImage": "Upload images"
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Your latest work and shared community projects, all in one place.",
+    "badge": "Community"
   }
 }
