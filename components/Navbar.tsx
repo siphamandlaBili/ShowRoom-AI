@@ -38,13 +38,13 @@ const Navbar = () => {
 
           <ul className="links">
             <li>
-              <a href="#">{t('navbar.product')}</a>
+              <a href="#products">{t('navbar.product')}</a>
             </li>
             <li>
-              <a href="#">{t('navbar.pricing')}</a>
+              <a href="#pricing">{t('navbar.pricing')}</a>
             </li>
             <li>
-              <a href="#">{t('navbar.community')}</a>
+              <a href="#community">{t('navbar.community')}</a>
             </li>
           </ul>
         </div>
@@ -52,9 +52,7 @@ const Navbar = () => {
         <div className="actions">
           {isSignedIn && <span className="greeting">{t('navbar.greeting', { username })}</span>}
           {isSignedIn ? (
-            <>
-              <Button text={t('navbar.logout')} onClick={handleAuthClick} variant="cta" />
-            </>
+            <Button text={t('navbar.logout')} onClick={handleAuthClick} variant="cta" />
           ) : (
             <>
               <Button text={t('navbar.login')} onClick={handleAuthClick} variant="ghost" />

@@ -45,6 +45,12 @@ export default [
     },
   },
   {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      'no-undef': 'off',
+    },
+  },
+  {
     files: ['**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       globals: {

@@ -12,5 +12,19 @@
     "signInError": "Échec de la connexion. Veuillez réessayer.",
     "signOutSuccess": "Déconnexion réussie!",
     "signOutError": "Échec de la déconnexion. Veuillez réessayer."
+  },
+  "hero": {
+    "subtitle": "ShowRoom est un environnement de conception axé sur l’IA qui vous aide à visualiser, rendre et livrer des projets architecturaux plus rapidement que jamais.",
+    "getStarted": "Commencer",
+    "title": "Créez de magnifiques espaces à la vitesse de la pensée avec ShowRoom",
+    "introducing": "Présentation de ShowRoom 1.0",
+    "upload": "Téléchargez votre plan d’étage",
+    "uploadDescription": "Prend en charge les formats JPG et PNG jusqu’à 10 Mo",
+    "uploadImage": "Téléchargez des images"
+  },
+  "projects": {
+    "title": "Projets",
+    "description": "Vos travaux récents et les projets partagés par la communauté, réunis en un seul endroit.",
+    "badge": "Communauté"
   }
 }
