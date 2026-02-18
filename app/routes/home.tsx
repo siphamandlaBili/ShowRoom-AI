@@ -1,9 +1,41 @@
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ArrowUpRight, Clock, Layers } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from 'components/Navbar';
+
+type GsapRuntime = typeof import('gsap').default;
+
+type ScaleSetter = (value: number) => unknown;
+
+function applySetters(setters: ScaleSetter[], value: number) {
+  for (const setter of setters) {
+    setter(value);
+  }
+}
+
+function updateHeroCharMagnify(
+  event: MouseEvent,
+  charElements: HTMLSpanElement[],
+  scaleSetters: ScaleSetter[],
+  ySetters: ScaleSetter[],
+) {
+  const radius = 95;
+  const maxScaleBoost = 0.42;
+  const maxLift = 7;
+
+  for (const [index, charElement] of charElements.entries()) {
+    const charRect = charElement.getBoundingClientRect();
+    const charCenterX = charRect.left + charRect.width / 2;
+    const charCenterY = charRect.top + charRect.height / 2;
+    const distance = Math.hypot(event.clientX - charCenterX, event.clientY - charCenterY);
+    const influence = Math.max(0, 1 - distance / radius);
+    const nextScale = 1 + influence * maxScaleBoost;
+    const nextY = -influence * maxLift;
+
+    scaleSetters[index](nextScale);
+    ySetters[index](nextY);
+  }
+}
 
 export function meta() {
   return [
@@ -29,160 +61,205 @@ export default function Home() {
   };
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    let isActive = true;
+    let context: ReturnType<GsapRuntime['context']> | null = null;
+    let cleanupInteractions: (() => void) | null = null;
+    let gridDriftTween: ReturnType<GsapRuntime['to']> | null = null;
 
-    const context = gsap.context(() => {
-      gsap.fromTo(
-        ['.hero .announce', '.hero h1', '.hero .subtitle', '.hero .actions', '.hero .upload-shell'],
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.7,
-          stagger: 0.12,
-          ease: 'power2.out',
-        },
-      );
+    const setupGsapAnimations = async () => {
+      let hasScrollTrigger = false;
+      let gsapRuntime: GsapRuntime;
 
-      gsap.fromTo(
-        ['.projects .section-head', '.projects .project-card'],
-        { y: 28, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.12,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: projectsRef.current,
-            start: 'top 82%',
-            once: true,
+      if (globalThis.window === undefined) {
+        return;
+      }
+
+      try {
+        const gsapModule = await import('gsap');
+        gsapRuntime = gsapModule.default;
+      } catch {
+        return;
+      }
+
+      try {
+        const scrollTriggerModule = await import('gsap/ScrollTrigger');
+        const scrollTriggerPlugin =
+          scrollTriggerModule.ScrollTrigger ?? scrollTriggerModule.default;
+
+        if (scrollTriggerPlugin) {
+          gsapRuntime.registerPlugin(scrollTriggerPlugin);
+          hasScrollTrigger = true;
+        }
+      } catch {
+        hasScrollTrigger = false;
+      }
+
+      if (!isActive) {
+        return;
+      }
+
+      context = gsapRuntime.context(() => {
+        gsapRuntime.fromTo(
+          [
+            '.hero .announce',
+            '.hero h1',
+            '.hero .subtitle',
+            '.hero .actions',
+            '.hero .upload-shell',
+          ],
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power2.out',
           },
-        },
+        );
+
+        if (hasScrollTrigger) {
+          gsapRuntime.fromTo(
+            ['.projects .section-head', '.projects .project-card'],
+            { y: 28, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.12,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: projectsRef.current,
+                start: 'top 82%',
+                once: true,
+              },
+            },
+          );
+          return;
+        }
+
+        gsapRuntime.fromTo(
+          ['.projects .section-head', '.projects .project-card'],
+          { y: 28, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: 'power2.out',
+            delay: 0.25,
+          },
+        );
+      }, pageRef);
+
+      const titleElement = heroTitleRef.current;
+      const uploadShellElement = uploadShellRef.current;
+      const gridOverlayElement =
+        uploadShellElement?.querySelector<HTMLDivElement>('.grid-overlay') ?? null;
+      const charElements = heroCharRefs.current.filter(Boolean);
+      const scaleSetters = charElements.map((charElement) =>
+        gsapRuntime.quickTo(charElement, 'scale', {
+          duration: 0.35,
+          ease: 'power3.out',
+        }),
       );
-    }, pageRef);
+      const ySetters = charElements.map((charElement) =>
+        gsapRuntime.quickTo(charElement, 'y', {
+          duration: 0.35,
+          ease: 'power3.out',
+        }),
+      );
 
-    const titleElement = heroTitleRef.current;
-    const uploadShellElement = uploadShellRef.current;
-    const gridOverlayElement =
-      uploadShellElement?.querySelector<HTMLDivElement>('.grid-overlay') ?? null;
-    const charElements = heroCharRefs.current.filter(Boolean);
-    const scaleSetters = charElements.map((charElement) =>
-      gsap.quickTo(charElement, 'scale', {
-        duration: 0.35,
-        ease: 'power3.out',
-      }),
-    );
-    const ySetters = charElements.map((charElement) =>
-      gsap.quickTo(charElement, 'y', {
-        duration: 0.35,
-        ease: 'power3.out',
-      }),
-    );
+      const resetCharScale = () => {
+        if (charElements.length === 0) {
+          return;
+        }
 
-    const resetCharScale = () => {
-      if (charElements.length === 0) {
-        return;
-      }
-
-      scaleSetters.forEach((setScale) => {
-        setScale(1);
-      });
-
-      ySetters.forEach((setY) => {
-        setY(0);
-      });
-    };
-
-    const handleTitleMouseMove = (event: MouseEvent) => {
-      if (!titleElement || charElements.length === 0) {
-        return;
-      }
-
-      const radius = 95;
-      const maxScaleBoost = 0.42;
-      const maxLift = 7;
-
-      charElements.forEach((charElement, index) => {
-        const charRect = charElement.getBoundingClientRect();
-        const charCenterX = charRect.left + charRect.width / 2;
-        const charCenterY = charRect.top + charRect.height / 2;
-        const distance = Math.hypot(event.clientX - charCenterX, event.clientY - charCenterY);
-        const influence = Math.max(0, 1 - distance / radius);
-        const nextScale = 1 + influence * maxScaleBoost;
-        const nextY = -influence * maxLift;
-
-        scaleSetters[index](nextScale);
-        ySetters[index](nextY);
-      });
-    };
-
-    if (titleElement && charElements.length > 0) {
-      titleElement.addEventListener('mousemove', handleTitleMouseMove);
-      titleElement.addEventListener('mouseleave', resetCharScale);
-    }
-
-    let handleGridMouseMove: ((event: MouseEvent) => void) | null = null;
-    let handleGridMouseLeave: (() => void) | null = null;
-    let gridDriftTween: gsap.core.Tween | null = null;
-
-    if (uploadShellElement && gridOverlayElement) {
-      const setGridX = gsap.quickTo(gridOverlayElement, 'x', {
-        duration: 0.45,
-        ease: 'power3.out',
-      });
-      const setGridY = gsap.quickTo(gridOverlayElement, 'y', {
-        duration: 0.45,
-        ease: 'power3.out',
-      });
-      const setGridOpacity = gsap.quickTo(gridOverlayElement, 'opacity', {
-        duration: 0.35,
-        ease: 'power2.out',
-      });
-
-      gridDriftTween = gsap.to(gridOverlayElement, {
-        backgroundPosition: '120px 120px, 120px 120px',
-        duration: 16,
-        repeat: -1,
-        ease: 'none',
-      });
-
-      handleGridMouseMove = (event: MouseEvent) => {
-        const bounds = uploadShellElement.getBoundingClientRect();
-        const ratioX = (event.clientX - bounds.left) / bounds.width - 0.5;
-        const ratioY = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-        setGridX(ratioX * 16);
-        setGridY(ratioY * 14);
-        setGridOpacity(0.62);
+        applySetters(scaleSetters, 1);
+        applySetters(ySetters, 0);
       };
 
-      handleGridMouseLeave = () => {
-        setGridX(0);
-        setGridY(0);
-        setGridOpacity(0.4);
+      const handleTitleMouseMove = (event: MouseEvent) => {
+        if (!titleElement || charElements.length === 0) {
+          return;
+        }
+
+        updateHeroCharMagnify(event, charElements, scaleSetters, ySetters);
       };
 
-      uploadShellElement.addEventListener('mousemove', handleGridMouseMove);
-      uploadShellElement.addEventListener('mouseleave', handleGridMouseLeave);
-    }
+      if (titleElement && charElements.length > 0) {
+        titleElement.addEventListener('mousemove', handleTitleMouseMove);
+        titleElement.addEventListener('mouseleave', resetCharScale);
+      }
+
+      let handleGridMouseMove: ((event: MouseEvent) => void) | null = null;
+      let handleGridMouseLeave: (() => void) | null = null;
+
+      if (uploadShellElement && gridOverlayElement) {
+        const setGridX = gsapRuntime.quickTo(gridOverlayElement, 'x', {
+          duration: 0.45,
+          ease: 'power3.out',
+        });
+        const setGridY = gsapRuntime.quickTo(gridOverlayElement, 'y', {
+          duration: 0.45,
+          ease: 'power3.out',
+        });
+        const setGridOpacity = gsapRuntime.quickTo(gridOverlayElement, 'opacity', {
+          duration: 0.35,
+          ease: 'power2.out',
+        });
+
+        gridDriftTween = gsapRuntime.to(gridOverlayElement, {
+          backgroundPosition: '120px 120px, 120px 120px',
+          duration: 16,
+          repeat: -1,
+          ease: 'none',
+        });
+
+        handleGridMouseMove = (event: MouseEvent) => {
+          const bounds = uploadShellElement.getBoundingClientRect();
+          const ratioX = (event.clientX - bounds.left) / bounds.width - 0.5;
+          const ratioY = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+          setGridX(ratioX * 16);
+          setGridY(ratioY * 14);
+          setGridOpacity(0.62);
+        };
+
+        handleGridMouseLeave = () => {
+          setGridX(0);
+          setGridY(0);
+          setGridOpacity(0.4);
+        };
+
+        uploadShellElement.addEventListener('mousemove', handleGridMouseMove);
+        uploadShellElement.addEventListener('mouseleave', handleGridMouseLeave);
+      }
+
+      cleanupInteractions = () => {
+        if (titleElement && charElements.length > 0) {
+          titleElement.removeEventListener('mousemove', handleTitleMouseMove);
+          titleElement.removeEventListener('mouseleave', resetCharScale);
+        }
+
+        if (uploadShellElement && handleGridMouseMove && handleGridMouseLeave) {
+          uploadShellElement.removeEventListener('mousemove', handleGridMouseMove);
+          uploadShellElement.removeEventListener('mouseleave', handleGridMouseLeave);
+        }
+      };
+    };
+
+    void setupGsapAnimations();
 
     return () => {
-      if (titleElement && charElements.length > 0) {
-        titleElement.removeEventListener('mousemove', handleTitleMouseMove);
-        titleElement.removeEventListener('mouseleave', resetCharScale);
-      }
+      isActive = false;
 
-      if (uploadShellElement && handleGridMouseMove && handleGridMouseLeave) {
-        uploadShellElement.removeEventListener('mousemove', handleGridMouseMove);
-        uploadShellElement.removeEventListener('mouseleave', handleGridMouseLeave);
-      }
+      cleanupInteractions?.();
 
       if (gridDriftTween) {
         gridDriftTween.kill();
       }
 
-      context.revert();
+      context?.revert();
     };
   }, [heroTitle]);
 
