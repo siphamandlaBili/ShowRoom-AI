@@ -1,5 +1,4 @@
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ArrowUpRight, Clock, Layers } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,38 +28,86 @@ export default function Home() {
   };
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    let isActive = true;
+    let context: gsap.Context | null = null;
 
-    const context = gsap.context(() => {
-      gsap.fromTo(
-        ['.hero .announce', '.hero h1', '.hero .subtitle', '.hero .actions', '.hero .upload-shell'],
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.7,
-          stagger: 0.12,
-          ease: 'power2.out',
-        },
-      );
+    const setupGsapAnimations = async () => {
+      let hasScrollTrigger = false;
 
-      gsap.fromTo(
-        ['.projects .section-head', '.projects .project-card'],
-        { y: 28, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.12,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: projectsRef.current,
-            start: 'top 82%',
-            once: true,
+      if (globalThis.window !== undefined) {
+        try {
+          const scrollTriggerModule = await import('gsap/ScrollTrigger');
+          const scrollTriggerPlugin =
+            scrollTriggerModule.ScrollTrigger ?? scrollTriggerModule.default;
+
+          if (scrollTriggerPlugin) {
+            gsap.registerPlugin(scrollTriggerPlugin);
+            hasScrollTrigger = true;
+          }
+        } catch {
+          hasScrollTrigger = false;
+        }
+      }
+
+      if (!isActive) {
+        return;
+      }
+
+      context = gsap.context(() => {
+        gsap.fromTo(
+          [
+            '.hero .announce',
+            '.hero h1',
+            '.hero .subtitle',
+            '.hero .actions',
+            '.hero .upload-shell',
+          ],
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power2.out',
           },
-        },
-      );
-    }, pageRef);
+        );
+
+        if (hasScrollTrigger) {
+          gsap.fromTo(
+            ['.projects .section-head', '.projects .project-card'],
+            { y: 28, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.12,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: projectsRef.current,
+                start: 'top 82%',
+                once: true,
+              },
+            },
+          );
+          return;
+        }
+
+        gsap.fromTo(
+          ['.projects .section-head', '.projects .project-card'],
+          { y: 28, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: 'power2.out',
+            delay: 0.25,
+          },
+        );
+      }, pageRef);
+    };
+
+    void setupGsapAnimations();
 
     const titleElement = heroTitleRef.current;
     const uploadShellElement = uploadShellRef.current;
@@ -168,6 +215,8 @@ export default function Home() {
     }
 
     return () => {
+      isActive = false;
+
       if (titleElement && charElements.length > 0) {
         titleElement.removeEventListener('mousemove', handleTitleMouseMove);
         titleElement.removeEventListener('mouseleave', resetCharScale);
@@ -182,7 +231,7 @@ export default function Home() {
         gridDriftTween.kill();
       }
 
-      context.revert();
+      context?.revert();
     };
   }, [heroTitle]);
 

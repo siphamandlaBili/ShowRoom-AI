@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Home from '../app/routes/home';
@@ -78,7 +78,7 @@ describe('Home route', () => {
     expect(characters).toHaveLength(expectedCharacterCount);
   });
 
-  it('initializes GSAP plugins and interactions', () => {
+  it('initializes GSAP plugins and interactions', async () => {
     const { container } = render(<Home />);
 
     const title = container.querySelector('.hero-title');
@@ -91,6 +91,10 @@ describe('Home route', () => {
       throw new Error('Expected hero title and upload shell elements to exist');
     }
 
+    await waitFor(() => {
+      expect(gsap.registerPlugin).toHaveBeenCalled();
+    });
+
     fireEvent.mouseMove(title, { clientX: 100, clientY: 100 });
     fireEvent.mouseLeave(title);
     fireEvent.mouseMove(uploadShell, { clientX: 150, clientY: 110 });
@@ -101,8 +105,13 @@ describe('Home route', () => {
     expect(gsap.to).toHaveBeenCalled();
   });
 
-  it('cleans up GSAP context and grid tween on unmount', () => {
+  it('cleans up GSAP context and grid tween on unmount', async () => {
     const { unmount } = render(<Home />);
+
+    await waitFor(() => {
+      expect(gsap.context).toHaveBeenCalled();
+      expect(gsap.to).toHaveBeenCalled();
+    });
 
     unmount();
 
