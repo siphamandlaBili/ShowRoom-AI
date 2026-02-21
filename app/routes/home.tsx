@@ -1,7 +1,9 @@
 import { ArrowRight, ArrowUpRight, Clock, Layers } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import Navbar from 'components/Navbar';
+import Upload from 'components/Upload';
 
 type GsapRuntime = typeof import('gsap').default;
 
@@ -53,6 +55,16 @@ export default function Home() {
   const uploadShellRef = useRef<HTMLDivElement | null>(null);
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
   const heroCharRefs = useRef<HTMLSpanElement[]>([]);
+
+  const navigate = useNavigate();
+
+  const handleUploadComplete = async () => {
+    const newId = Date.now().toString();
+
+    navigate(`/visualizer/${newId}`);
+
+    return true;
+  };
 
   const setHeroCharRef = (element: HTMLSpanElement | null, index: number) => {
     if (element) {
@@ -307,7 +319,7 @@ export default function Home() {
               <h3>{t('hero.upload')}</h3>
               <p>{t('hero.uploadDescription')}</p>
             </div>
-            <p>{t('hero.uploadImage')}</p>
+            <Upload onComplete={handleUploadComplete} />
           </div>
         </div>
       </section>

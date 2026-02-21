@@ -20,7 +20,9 @@
     "introducing": "Présentation de ShowRoom 1.0",
     "upload": "Téléchargez votre plan d’étage",
     "uploadDescription": "Prend en charge les formats JPG et PNG jusqu’à 10 Mo",
-    "uploadImage": "Téléchargez des images"
+    "uploadImage": "Téléchargez des images",
+    "uploadActive": "Glissez-déposez votre image ici ou cliquez pour sélectionner un fichier",
+    "uploadInactive": "Veuillez vous connecter pour télécharger vos images"
   },
   "projects": {
     "title": "Projets",
