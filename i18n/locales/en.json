@@ -20,7 +20,11 @@
     "introducing": "Introducing ShowRoom 1.0",
     "upload": "Upload your floor plan",
     "uploadDescription": "Supports JPG, PNG, formats up to 10MB",
-    "uploadImage": "Upload images"
+    "uploadImage": "Upload images",
+    "uploadActive": "Drag and drop your image here, or click to select a file",
+    "uploadInactive": "Please sign in to upload your images",
+    "analysingFloorPlanMessage": "Analyse du plan d’étage en cours...",
+    "RedirectingMessage": "Redirection en cours..."
   },
   "projects": {
     "title": "Projects",

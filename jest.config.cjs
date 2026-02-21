@@ -29,6 +29,8 @@ module.exports = {
 
   moduleNameMapper: {
     '^components/(.*)$': '<rootDir>/components/$1',
+    '^lib/constants$': '<rootDir>/lib/__mocks__/constants.ts',
+    '^lib/(.*)$': '<rootDir>/lib/$1',
   },
 
   // Enforce minimum coverage thresholds

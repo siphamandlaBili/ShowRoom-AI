@@ -35,6 +35,22 @@ jest.mock('lucide-react', () => ({
   ArrowUpRight: () => <svg data-testid="arrow-up-right" />,
   Clock: () => <svg data-testid="clock-icon" />,
   Layers: () => <svg data-testid="layers-icon" />,
+  // Used by Upload component rendered inside Home
+  CloudUploadIcon: () => <svg data-testid="cloud-upload-icon" />,
+  ImageIcon: () => <svg data-testid="image-icon" />,
+  CheckCircle2: () => <svg data-testid="check-circle-icon" />,
+}));
+
+jest.mock('react-router', () => ({
+  useNavigate: () => jest.fn(),
+  useOutletContext: () => ({
+    isSignedIn: false,
+    username: null,
+    userId: null,
+    refreshAuth: jest.fn(),
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+  }),
 }));
 
 jest.mock('gsap', () => ({
