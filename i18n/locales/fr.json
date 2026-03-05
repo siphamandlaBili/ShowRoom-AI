@@ -28,5 +28,9 @@
     "title": "Projets",
     "description": "Vos travaux récents et les projets partagés par la communauté, réunis en un seul endroit.",
     "badge": "Communauté"
+  },
+  "visualizer": {
+    "title": "projet sans titre",
+    "sourceImage": "Image source"
   }
 }

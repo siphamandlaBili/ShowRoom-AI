@@ -30,6 +30,7 @@ module.exports = {
   moduleNameMapper: {
     '^components/(.*)$': '<rootDir>/components/$1',
     '^lib/constants$': '<rootDir>/lib/__mocks__/constants.ts',
+    '^lib/puter\\.action$': '<rootDir>/lib/__mocks__/puter.action.ts',
     '^lib/(.*)$': '<rootDir>/lib/$1',
   },
 
