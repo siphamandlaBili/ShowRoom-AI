@@ -312,4 +312,120 @@ describe('Upload', () => {
 
     expect(dropzone).not.toHaveClass('is-dragging');
   });
+
+  // ── Aria labels ───────────────────────────────────────────────────────────
+
+  it('sets aria-label to uploadActive when signed in', () => {
+    render(<Upload />);
+    const dropzone = document.querySelector('.dropzone')!;
+    expect(dropzone).toHaveAttribute('aria-label', 'hero.uploadActive');
+  });
+
+  it('sets aria-label to uploadInactive when not signed in', () => {
+    mockAuthContext.isSignedIn = false;
+    render(<Upload />);
+    const dropzone = document.querySelector('.dropzone')!;
+    expect(dropzone).toHaveAttribute('aria-label', 'hero.uploadInactive');
+  });
+
+  // ── File input attributes ─────────────────────────────────────────────────
+
+  it('file input accepts only jpg, jpeg and png', () => {
+    render(<Upload />);
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    expect(input).toHaveAttribute('accept', '.jpg,.jpeg,.png');
+  });
+
+  it('file input is of type file', () => {
+    render(<Upload />);
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    expect(input).toHaveAttribute('type', 'file');
+  });
+
+  it('does nothing when input change fires with no files', async () => {
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [] } });
+    });
+
+    // upload-status must NOT appear — dropzone stays visible
+    expect(document.querySelector('.upload-status')).not.toBeInTheDocument();
+    expect(document.querySelector('.dropzone')).toBeInTheDocument();
+  });
+
+  // ── Progress bar style ────────────────────────────────────────────────────
+
+  it('renders progress bar with width 0% immediately after file selection', async () => {
+    jest.useFakeTimers();
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    const bar = document.querySelector<HTMLElement>('.bar')!;
+    // Before any timer ticks the width is 0 %
+    expect(bar.style.width).toBe('0%');
+
+    jest.useRealTimers();
+  });
+
+  it('progress bar reaches 100% width after completion', async () => {
+    jest.useFakeTimers();
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(PROGRESS_INTERVAL_MS * TICKS_TO_COMPLETE);
+    });
+
+    const bar = document.querySelector<HTMLElement>('.bar')!;
+    expect(bar.style.width).toBe('100%');
+
+    jest.useRealTimers();
+  });
+
+  // ── Cloud upload icon ─────────────────────────────────────────────────────
+
+  it('renders the cloud upload icon in the dropzone', () => {
+    render(<Upload />);
+    expect(screen.getByTestId('cloud-upload-icon')).toBeInTheDocument();
+  });
+
+  it('hides the cloud upload icon once a file is selected', async () => {
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    expect(screen.queryByTestId('cloud-upload-icon')).not.toBeInTheDocument();
+  });
+
+  // ── JPEG support ──────────────────────────────────────────────────────────
+
+  it('handles jpeg file upload correctly', async () => {
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile('photo.jpeg', 'image/jpeg')] } });
+    });
+
+    expect(screen.getByText('photo.jpeg')).toBeInTheDocument();
+    expect(screen.getByText('hero.analysingFloorPlanMessage')).toBeInTheDocument();
+  });
 });
