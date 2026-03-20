@@ -80,7 +80,7 @@ export default function Home() {
       return false;
     }
 
-    setProjects((prev) => [newItem, ...prev]);
+    setProjects((prev) => [saved, ...prev]);
 
     navigate(`/visualizer/${newId}`, {
       state: {

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 interface ButtonProps {
   text: string;
   onClick?: () => void;
@@ -5,6 +7,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   disabled?: boolean;
+  icon?: ReactNode;
 }
 
 const Button = ({
@@ -14,6 +17,7 @@ const Button = ({
   type = 'button',
   className = '',
   disabled = false,
+  icon,
 }: ButtonProps) => {
   const variantClasses = {
     default: 'btn-default',
@@ -27,6 +31,7 @@ const Button = ({
   if (variant === 'cta' && !onClick) {
     return (
       <a href="#upload" className={`${baseClass} ${className}`}>
+        {icon && <span className="btn-icon">{icon}</span>}
         {text}
       </a>
     );
@@ -39,6 +44,7 @@ const Button = ({
       className={`${baseClass} ${className}`}
       disabled={disabled}
     >
+      {icon && <span className="btn-icon">{icon}</span>}
       {text}
     </button>
   );
