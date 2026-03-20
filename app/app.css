@@ -282,10 +282,10 @@
       }
 
       .exit {
-        @apply text-zinc-500 hover:text-black hover:bg-zinc-100;
+        @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 hover:text-black hover:bg-zinc-100 px-3 py-2 rounded-lg transition-all duration-200;
 
-        .icon {
-          @apply w-5 h-5 mr-2;
+        .btn-icon {
+          @apply w-4 h-4;
         }
       }
     }
@@ -322,11 +322,11 @@
           @apply flex flex-wrap items-center gap-3;
 
           .export {
-            @apply bg-primary text-white hover:bg-orange-600 h-9 border-none shadow-sm;
+            @apply inline-flex items-center gap-2 bg-primary text-white text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg border-none shadow-sm hover:bg-orange-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
           }
 
           .share {
-            @apply bg-black text-white h-9 shadow-sm hover:bg-zinc-800;
+            @apply inline-flex items-center gap-2 bg-zinc-900 text-white text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg border-none shadow-sm hover:bg-zinc-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
           }
         }
       }

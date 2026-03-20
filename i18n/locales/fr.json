@@ -31,6 +31,13 @@
   },
   "visualizer": {
     "title": "projet sans titre",
-    "sourceImage": "Image source"
+    "sourceImage": "Image source",
+    "back": "Quitter l'éditeur",
+    "projectLabel": "Projet",
+    "createdBy": "Créé par vous",
+    "export": "Exporter",
+    "share": "Partager",
+    "rendering": "Rendu en cours...",
+    "renderingSubtitle": "Génération de votre visualisation 3D"
   }
 }

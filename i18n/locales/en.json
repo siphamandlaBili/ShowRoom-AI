@@ -32,7 +32,14 @@
     "badge": "Community"
   },
   "visualizer": {
-    "title": "untitle project",
-    "sourceImage": "Source Image"
+    "title": "untitled project",
+    "sourceImage": "Source Image",
+    "back": "exit editor",
+    "projectLabel": "Project",
+    "createdBy": "Created by you",
+    "export": "Export",
+    "share": "Share",
+    "rendering": "Rendering...",
+    "renderingSubtitle": "Generating your 3D visualization"
   }
 }

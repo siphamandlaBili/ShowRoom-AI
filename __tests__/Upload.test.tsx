@@ -428,4 +428,136 @@ describe('Upload', () => {
     expect(screen.getByText('photo.jpeg')).toBeInTheDocument();
     expect(screen.getByText('hero.analysingFloorPlanMessage')).toBeInTheDocument();
   });
+
+  // ── Status icon during progress ───────────────────────────────────────────
+
+  it('shows image-icon while progress is below 100%', async () => {
+    jest.useFakeTimers();
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    // Advance only part-way through
+    act(() => {
+      jest.advanceTimersByTime(PROGRESS_INTERVAL_MS * Math.floor(TICKS_TO_COMPLETE / 2));
+    });
+
+    expect(screen.getByTestId('image-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('check-circle-icon')).not.toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  it('shows check-circle-icon once progress reaches 100%', async () => {
+    jest.useFakeTimers();
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(PROGRESS_INTERVAL_MS * TICKS_TO_COMPLETE);
+    });
+
+    expect(screen.getByTestId('check-circle-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('image-icon')).not.toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  // ── Intermediate progress bar width ───────────────────────────────────────
+
+  it('progress bar has a non-zero width before reaching 100%', async () => {
+    jest.useFakeTimers();
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile()] } });
+    });
+
+    const steps = Math.floor(TICKS_TO_COMPLETE / 2);
+    act(() => {
+      jest.advanceTimersByTime(PROGRESS_INTERVAL_MS * steps);
+    });
+
+    const bar = document.querySelector<HTMLElement>('.bar')!;
+    const width = parseFloat(bar.style.width);
+    expect(width).toBeGreaterThan(0);
+    expect(width).toBeLessThan(100);
+
+    jest.useRealTimers();
+  });
+
+  // ── Drop with no files in dataTransfer ────────────────────────────────────
+
+  it('does not process a drop event when dataTransfer has no files', async () => {
+    mockFileReader();
+    render(<Upload />);
+    const dropzone = document.querySelector('.dropzone')!;
+
+    await act(async () => {
+      fireEvent.drop(dropzone, { dataTransfer: { files: [] } });
+    });
+
+    expect(document.querySelector('.upload-status')).not.toBeInTheDocument();
+    expect(document.querySelector('.dropzone')).toBeInTheDocument();
+  });
+
+  // ── drop-content text ─────────────────────────────────────────────────────
+
+  it('renders the upload-active text inside drop-content when signed in', () => {
+    render(<Upload />);
+    const dropContent = document.querySelector('.drop-content p');
+    expect(dropContent).toHaveTextContent('hero.uploadActive');
+  });
+
+  it('renders the upload-inactive text inside drop-content when not signed in', () => {
+    mockAuthContext.isSignedIn = false;
+    render(<Upload />);
+    const dropContent = document.querySelector('.drop-content p');
+    expect(dropContent).toHaveTextContent('hero.uploadInactive');
+  });
+
+  // ── Upload component renders without crashing ─────────────────────────────
+
+  it('renders without any props without throwing', () => {
+    expect(() => render(<Upload />)).not.toThrow();
+  });
+
+  // ── Large file name display ───────────────────────────────────────────────
+
+  it('displays the full file name including extension', async () => {
+    mockFileReader();
+    render(<Upload />);
+
+    const input = document.querySelector<HTMLInputElement>('.drop-input')!;
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [makeFile('my-floor-plan-v2.png')] } });
+    });
+
+    expect(screen.getByText('my-floor-plan-v2.png')).toBeInTheDocument();
+  });
+
+  // ── Drag does not add is-dragging when not signed in ─────────────────────
+
+  it('does not set is-dragging at all when dragover fires while signed out', () => {
+    mockAuthContext.isSignedIn = false;
+    render(<Upload />);
+    const dropzone = document.querySelector('.dropzone')!;
+
+    act(() => {
+      fireEvent.dragOver(dropzone);
+    });
+
+    expect(dropzone.classList.contains('is-dragging')).toBe(false);
+  });
 });
