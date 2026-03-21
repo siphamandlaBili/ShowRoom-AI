@@ -333,7 +333,7 @@ describe('Upload', () => {
   it('file input accepts only jpg, jpeg and png', () => {
     render(<Upload />);
     const input = document.querySelector<HTMLInputElement>('.drop-input')!;
-    expect(input).toHaveAttribute('accept', '.jpg,.jpeg,.png');
+    expect(input).toHaveAttribute('accept', '.jpg,.jpeg,.png,.webp');
   });
 
   it('file input is of type file', () => {
