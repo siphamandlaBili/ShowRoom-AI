@@ -29,7 +29,11 @@
   "projects": {
     "title": "Projects",
     "description": "Your latest work and shared community projects, all in one place.",
-    "badge": "Community"
+    "badge": "Community",
+    "badgePublic": "Public",
+    "badgePrivate": "Private",
+    "loading": "Loading projects...",
+    "empty": "No projects yet. Upload a floor plan to get started."
   },
   "visualizer": {
     "title": "untitled project",
@@ -40,6 +44,25 @@
     "export": "Export",
     "share": "Share",
     "rendering": "Rendering...",
-    "renderingSubtitle": "Generating your 3D visualization"
+    "renderingSubtitle": "Generating your 3D visualization",
+    "generationSuccess": "3D render complete!",
+    "saveFailed": "Render complete but failed to save.",
+    "public": "Public",
+    "private": "Private",
+    "makePublic": "Make visible to community",
+    "makePrivate": "Make private",
+    "madePublic": "Project is now public",
+    "madePrivate": "Project is now private",
+    "visibilityError": "Failed to update visibility",
+    "compareHint": "Drag to compare",
+    "originalLabel": "Original",
+    "renderedLabel": "Rendered",
+    "originalAlt": "Original floor plan",
+    "renderedAlt": "AI 3D Render",
+    "exportSuccess": "Image saved!",
+    "exportError": "Failed to save image",
+    "shareSuccess": "Link copied to clipboard",
+    "shareError": "Failed to copy link",
+    "shareNotPublic": "Make the project public before sharing"
   }
 }

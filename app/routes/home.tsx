@@ -2,10 +2,10 @@ import { ArrowRight, ArrowUpRight, Clock, Layers } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate, useOutletContext } from 'react-router';
 import Navbar from 'components/Navbar';
 import Upload from 'components/Upload';
-import { createProject } from 'lib/puter.action';
+import { createProject, getProjects } from 'lib/puter.action';
 
 type GsapRuntime = typeof import('gsap').default;
 
@@ -59,9 +59,24 @@ export default function Home() {
   const heroCharRefs = useRef<HTMLSpanElement[]>([]);
 
   const navigate = useNavigate();
+  const { isSignedIn, username } = useOutletContext<AuthContext>();
   const [projects, setProjects] = useState<DesignItem[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
   const isCreatingProjectRef = useRef(false);
+
+  // Load projects whenever the user signs in
+  useEffect(() => {
+    if (!isSignedIn) {
+      setProjects([]);
+      return;
+    }
+    setIsLoadingProjects(true);
+    getProjects()
+      .then((fetched) => setProjects(fetched))
+      .catch((err) => console.error('[getProjects]', err))
+      .finally(() => setIsLoadingProjects(false));
+  }, [isSignedIn]);
 
   const handleUploadComplete = async (base64Image: string) => {
     if (isCreatingProjectRef.current) return false;
@@ -373,32 +388,54 @@ export default function Home() {
           </div>
 
           <div className="projects-grid">
-            {projects.map(({ id, name, sourceImage, renderedImage, timestamp }) => (
-              <div key={id} className="project-card group">
-                <div className="preview">
-                  <img src={renderedImage || sourceImage} alt="project" />
-                  <div className="badge">
-                    <span>{t('projects.badge')}</span>
-                  </div>
-                </div>
-
-                <div className="card-body">
-                  <div>
-                    <h3>{name}</h3>
-
-                    <div className="meta">
-                      <Clock size={12} />
-                      <span>{new Date(timestamp).toLocaleDateString()}</span>
-                      <span>By Sipha</span>
+            {isLoadingProjects ? (
+              <p className="projects-empty">{t('projects.loading')}</p>
+            ) : projects.length === 0 ? (
+              <p className="projects-empty">{t('projects.empty')}</p>
+            ) : (
+              projects.map(({ id, name, sourceImage, renderedImage, timestamp, isPublic }) => (
+                <div
+                  key={id}
+                  className="project-card group"
+                  onClick={() =>
+                    navigate(`/visualizer/${id}`, {
+                      state: {
+                        initialImage: sourceImage,
+                        initialRender: renderedImage || null,
+                        name,
+                        isPublic,
+                      },
+                    })
+                  }
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="preview">
+                    <img src={renderedImage || sourceImage} alt={name ?? 'project'} />
+                    <div className={`badge ${isPublic ? 'badge--public' : 'badge--private'}`}>
+                      <span>
+                        {isPublic ? t('projects.badgePublic') : t('projects.badgePrivate')}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="arrow">
-                    <ArrowUpRight size={16} />
+                  <div className="card-body">
+                    <div>
+                      <h3>{name}</h3>
+
+                      <div className="meta">
+                        <Clock size={12} />
+                        <span>{new Date(timestamp).toLocaleDateString()}</span>
+                        {username && <span>By {username}</span>}
+                      </div>
+                    </div>
+
+                    <div className="arrow">
+                      <ArrowUpRight size={16} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>

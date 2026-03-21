@@ -59,6 +59,7 @@ type VisualizerLocationState = {
   ownerId?: string | null;
   name?: string | null;
   sharedBy?: string | null;
+  isPublic?: boolean;
 };
 
 interface VisualizerProps {

@@ -1,11 +1,13 @@
-import { Box, LogOut, RefreshCcw } from 'lucide-react';
+import { Box, Globe, Lock, LogOut, RefreshCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useOutletContext, useParams } from 'react-router';
 import Button from 'components/ui/Button';
 import { generate3DView } from 'lib/ai.action';
 import { createProject, getProjectById } from 'lib/puter.action';
+import { imageUrlToPngBlob, isHostedUrl } from 'lib/utils';
 
 const VisualizerId = () => {
   const { id } = useParams();
@@ -14,19 +16,98 @@ const VisualizerId = () => {
   const location = useLocation();
   const { userId } = useOutletContext<AuthContext>();
 
-  // Location state is set when navigating from upload (project not yet saved)
   const locationState = location.state as VisualizerLocationState | null;
 
   const hasInitialGenerated = useRef(false);
 
-  const [projectId, setProjectId] = useState<DesignItem | null>(null);
+  const [project, setProject] = useState<DesignItem | null>(null);
   const [isProjectLoading, setIsProjectLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(
     locationState?.initialRender || null,
   );
+  const [isPublic, setIsPublic] = useState(false);
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const handleBack = () => navigate('/');
+
+  const handleExport = async () => {
+    if (!currentImage || isExporting) return;
+
+    setIsExporting(true);
+    try {
+      const blob = await imageUrlToPngBlob(currentImage);
+      if (!blob) throw new Error('blob conversion failed');
+
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = `${project?.name ?? `showroom-${id}`}.png`;
+      anchor.click();
+      URL.revokeObjectURL(objectUrl);
+      toast.success(t('visualizer.exportSuccess'));
+    } catch {
+      toast.error(t('visualizer.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!currentImage || isSharing) return;
+
+    if (!isPublic) {
+      toast.error(t('visualizer.shareNotPublic'));
+      return;
+    }
+
+    const shareUrl =
+      project?.renderedImage && isHostedUrl(project.renderedImage)
+        ? project.renderedImage
+        : currentImage;
+
+    setIsSharing(true);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success(t('visualizer.shareSuccess'));
+    } catch {
+      toast.error(t('visualizer.shareError'));
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleVisibilityToggle = async () => {
+    if (!project || isTogglingVisibility) return;
+
+    const nextVisibility = isPublic ? 'private' : 'public';
+    setIsTogglingVisibility(true);
+
+    try {
+      const updatedItem: DesignItem = {
+        ...project,
+        renderedImage: currentImage ?? project.renderedImage ?? undefined,
+        isPublic: !isPublic,
+        ownerId: project.ownerId ?? userId ?? null,
+      };
+
+      const saved = await createProject({ item: updatedItem, visibility: nextVisibility });
+
+      if (saved) {
+        setProject(saved);
+        setIsPublic(!isPublic);
+        toast.success(
+          nextVisibility === 'public' ? t('visualizer.madePublic') : t('visualizer.madePrivate'),
+        );
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('visualizer.visibilityError'));
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  };
 
   const runGeneration = async (item: DesignItem) => {
     if (!id || !item?.sourceImage) return;
@@ -34,26 +115,27 @@ const VisualizerId = () => {
     try {
       setIsProcessing(true);
 
-      const result = await generate3DView({
-        sourceImage: item.sourceImage,
-      });
+      const result = await generate3DView({ sourceImage: item.sourceImage });
 
       if (result.renderedImage) {
         setCurrentImage(result.renderedImage);
 
-        const updatedItem = {
+        const updatedItem: DesignItem = {
           ...item,
           renderedImage: result.renderedImage,
           renderedPath: result.renderedPath,
           timestamp: Date.now(),
           ownerId: item.ownerId ?? userId ?? null,
-          isPublic: item.isPublic ?? false,
+          isPublic: isPublic,
         };
 
-        const saved = await createProject({ item: updatedItem, visibility: 'private' });
+        const saved = await createProject({
+          item: updatedItem,
+          visibility: isPublic ? 'public' : 'private',
+        });
 
         if (saved) {
-          setProjectId(saved);
+          setProject(saved);
           setCurrentImage(saved.renderedImage || result.renderedImage);
           toast.success(t('visualizer.generationSuccess'));
         } else {
@@ -76,8 +158,6 @@ const VisualizerId = () => {
         return;
       }
 
-      // If we arrived from the upload flow, use location state directly —
-      // the project may not be persisted yet (background save still in flight)
       if (locationState?.initialImage) {
         const synthetic: DesignItem = {
           id,
@@ -86,8 +166,10 @@ const VisualizerId = () => {
           renderedImage: locationState.initialRender ?? undefined,
           timestamp: Date.now(),
           ownerId: locationState.ownerId ?? null,
+          isPublic: locationState.isPublic ?? false,
         };
-        setProjectId(synthetic);
+        setProject(synthetic);
+        setIsPublic(locationState.isPublic ?? false);
         setCurrentImage(locationState.initialRender || null);
         setIsProjectLoading(false);
         hasInitialGenerated.current = false;
@@ -95,36 +177,37 @@ const VisualizerId = () => {
       }
 
       setIsProjectLoading(true);
-
       const fetchedProject = await getProjectById({ id });
 
       if (!isMounted) return;
 
-      setProjectId(fetchedProject);
+      setProject(fetchedProject);
+      setIsPublic(fetchedProject?.isPublic ?? false);
       setCurrentImage(fetchedProject?.renderedImage || null);
       setIsProjectLoading(false);
       hasInitialGenerated.current = false;
     };
 
     loadProject();
-
     return () => {
       isMounted = false;
     };
   }, [id, locationState]);
 
   useEffect(() => {
-    if (isProjectLoading || hasInitialGenerated.current || !projectId?.sourceImage) return;
+    if (isProjectLoading || hasInitialGenerated.current || !project?.sourceImage) return;
 
-    if (projectId.renderedImage) {
-      setCurrentImage(projectId.renderedImage);
+    if (project.renderedImage) {
+      setCurrentImage(project.renderedImage);
       hasInitialGenerated.current = true;
       return;
     }
 
     hasInitialGenerated.current = true;
-    void runGeneration(projectId);
-  }, [projectId, isProjectLoading]);
+    void runGeneration(project);
+  }, [project, isProjectLoading]);
+
+  const showCompare = !isProcessing && !!currentImage && !!project?.sourceImage;
 
   return (
     <div className="visualizer">
@@ -148,35 +231,89 @@ const VisualizerId = () => {
           <div className="panel-header">
             <div className="panel-meta">
               <p>{t('visualizer.projectLabel')}</p>
-              <h2>{projectId?.name || `Residence ${id}`}</h2>
+              <h2>{project?.name || `Residence ${id}`}</h2>
               <p className="note">{t('visualizer.createdBy')}</p>
             </div>
 
             <div className="panel-actions">
+              {/* Visibility toggle */}
+              <button
+                type="button"
+                className={`visibility-toggle ${isPublic ? 'is-public' : 'is-private'}`}
+                onClick={handleVisibilityToggle}
+                disabled={isTogglingVisibility || isProcessing || !currentImage}
+                title={isPublic ? t('visualizer.makePrivate') : t('visualizer.makePublic')}
+              >
+                {isPublic ? (
+                  <>
+                    <Globe size={14} />
+                    <span>{t('visualizer.public')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock size={14} />
+                    <span>{t('visualizer.private')}</span>
+                  </>
+                )}
+              </button>
+
               <Button
-                text={t('visualizer.export')}
-                onClick={() => {}}
+                text={isExporting ? '...' : t('visualizer.export')}
+                onClick={handleExport}
                 variant="outline"
                 className="export"
-                disabled={isProcessing}
+                disabled={isProcessing || isExporting || !currentImage}
               />
               <Button
-                text={t('visualizer.share')}
-                onClick={() => {}}
+                text={isSharing ? '...' : t('visualizer.share')}
+                onClick={handleShare}
                 variant="outline"
                 className="share"
-                disabled={isProcessing}
+                disabled={isProcessing || isSharing || !currentImage}
               />
             </div>
           </div>
 
           <div className={`render-area ${isProcessing ? 'is-processing' : ''}`}>
-            {currentImage ? (
-              <img src={currentImage} alt="AI Render" className="render-img" />
+            {showCompare ? (
+              <div className="compare-wrapper">
+                <p className="compare-hint">{t('visualizer.compareHint')}</p>
+                <ReactCompareSlider
+                  className="compare-slider"
+                  itemOne={
+                    <div className="compare-item">
+                      <ReactCompareSliderImage
+                        src={project!.sourceImage}
+                        alt={t('visualizer.originalAlt')}
+                        style={{ objectFit: 'contain', background: '#f4f4f5' }}
+                      />
+                      <span className="compare-label compare-label--left">
+                        {t('visualizer.originalLabel')}
+                      </span>
+                    </div>
+                  }
+                  itemTwo={
+                    <div className="compare-item">
+                      <ReactCompareSliderImage
+                        src={currentImage!}
+                        alt={t('visualizer.renderedAlt')}
+                        style={{ objectFit: 'contain', background: '#f4f4f5' }}
+                      />
+                      <span className="compare-label compare-label--right">
+                        {t('visualizer.renderedLabel')}
+                      </span>
+                    </div>
+                  }
+                />
+              </div>
             ) : (
               <div className="render-placeholder">
-                {projectId?.sourceImage && (
-                  <img src={projectId.sourceImage} alt="Original" className="render-fallback" />
+                {project?.sourceImage && (
+                  <img
+                    src={project.sourceImage}
+                    alt={t('visualizer.originalAlt')}
+                    className="render-fallback"
+                  />
                 )}
               </div>
             )}

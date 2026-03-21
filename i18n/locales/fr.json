@@ -27,7 +27,11 @@
   "projects": {
     "title": "Projets",
     "description": "Vos travaux récents et les projets partagés par la communauté, réunis en un seul endroit.",
-    "badge": "Communauté"
+    "badge": "Communauté",
+    "badgePublic": "Public",
+    "badgePrivate": "Privé",
+    "loading": "Chargement des projets...",
+    "empty": "Aucun projet pour l'instant. Téléchargez un plan pour commencer."
   },
   "visualizer": {
     "title": "projet sans titre",
@@ -38,6 +42,25 @@
     "export": "Exporter",
     "share": "Partager",
     "rendering": "Rendu en cours...",
-    "renderingSubtitle": "Génération de votre visualisation 3D"
+    "renderingSubtitle": "Génération de votre visualisation 3D",
+    "generationSuccess": "Rendu 3D terminé !",
+    "saveFailed": "Rendu terminé mais échec de l'enregistrement.",
+    "public": "Public",
+    "private": "Privé",
+    "makePublic": "Rendre visible pour la communauté",
+    "makePrivate": "Rendre privé",
+    "madePublic": "Le projet est maintenant public",
+    "madePrivate": "Le projet est maintenant privé",
+    "visibilityError": "Impossible de modifier la visibilité",
+    "compareHint": "Glisser pour comparer",
+    "originalLabel": "Original",
+    "renderedLabel": "Rendu",
+    "originalAlt": "Plan d’étage original",
+    "renderedAlt": "Rendu 3D IA",
+    "exportSuccess": "Image enregistrée !",
+    "exportError": "Échec de l'enregistrement de l'image",
+    "shareSuccess": "Lien copié dans le presse-papiers",
+    "shareError": "Échec de la copie du lien",
+    "shareNotPublic": "Rendez le projet public avant de partager"
   }
 }

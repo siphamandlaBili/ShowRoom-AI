@@ -321,6 +321,18 @@
         .panel-actions {
           @apply flex flex-wrap items-center gap-3;
 
+          .visibility-toggle {
+            @apply inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-3 py-2 rounded-lg border transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
+
+            &.is-public {
+              @apply bg-green-50 text-green-700 border-green-200 hover:bg-green-100;
+            }
+
+            &.is-private {
+              @apply bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200;
+            }
+          }
+
           .export {
             @apply inline-flex items-center gap-2 bg-primary text-white text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg border-none shadow-sm hover:bg-orange-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
           }
@@ -333,6 +345,40 @@
 
       .render-area {
         @apply relative bg-zinc-100 min-h-105;
+
+        .compare-wrapper {
+          @apply relative w-full;
+
+          .compare-hint {
+            @apply absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full pointer-events-none whitespace-nowrap backdrop-blur-sm;
+          }
+
+          .compare-slider {
+            @apply w-full;
+            aspect-ratio: 1 / 1;
+            max-height: 600px;
+
+            img {
+              @apply w-full h-full;
+            }
+          }
+
+          .compare-item {
+            @apply relative w-full h-full;
+          }
+
+          .compare-label {
+            @apply absolute bottom-3 z-10 bg-black/60 text-white text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-md backdrop-blur-sm pointer-events-none;
+
+            &.compare-label--left {
+              @apply left-3;
+            }
+
+            &.compare-label--right {
+              @apply right-3;
+            }
+          }
+        }
 
         .render-img {
           @apply w-full h-full object-contain transition-all duration-700 opacity-100 scale-100;
@@ -528,6 +574,10 @@
         .projects-grid {
           @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
 
+          .projects-empty {
+            @apply col-span-full text-center text-sm text-zinc-400 py-16;
+          }
+
           .project-card {
             @apply relative bg-white rounded-xl overflow-hidden border border-zinc-200 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full;
 
@@ -543,6 +593,22 @@
 
                 span {
                   @apply text-[10px] font-bold uppercase tracking-wider text-zinc-800;
+                }
+
+                &.badge--public {
+                  @apply bg-green-50/90 border-green-200;
+
+                  span {
+                    @apply text-green-700;
+                  }
+                }
+
+                &.badge--private {
+                  @apply bg-zinc-100/90 border-zinc-200;
+
+                  span {
+                    @apply text-zinc-500;
+                  }
                 }
               }
             }
