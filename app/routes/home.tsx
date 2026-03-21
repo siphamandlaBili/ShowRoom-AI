@@ -61,36 +61,48 @@ export default function Home() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<DesignItem[]>([]);
 
+  const isCreatingProjectRef = useRef(false);
+
   const handleUploadComplete = async (base64Image: string) => {
-    const newId = Date.now().toString();
-    const name = `Residence-${newId}`;
+    if (isCreatingProjectRef.current) return false;
 
-    const newItem = {
-      id: newId,
-      name,
-      sourceImage: base64Image,
-      renderedImage: undefined,
-      timestamp: Date.now(),
-    };
+    isCreatingProjectRef.current = true;
 
-    const saved = await createProject({ item: newItem, visibility: 'private' });
+    try {
+      const newId = Date.now().toString();
+      const name = `Residence-${newId}`;
 
-    if (!saved) {
-      toast.error('Failed to create project. Please try again.');
-      return false;
-    }
+      // Navigate immediately so the user isn't blocked waiting for hosting/worker
+      navigate(`/visualizer/${newId}`, {
+        state: {
+          initialImage: base64Image,
+          initialRender: null,
+          name,
+        },
+      });
 
-    setProjects((prev) => [saved, ...prev]);
-
-    navigate(`/visualizer/${newId}`, {
-      state: {
-        initialImage: saved.sourceImage,
-        initialRender: saved.renderedImage || null,
+      // Save the project in the background — don't block routing on it
+      const newItem = {
+        id: newId,
         name,
-      },
-    });
+        sourceImage: base64Image,
+        renderedImage: undefined,
+        timestamp: Date.now(),
+      };
 
-    return true;
+      createProject({ item: newItem, visibility: 'private' })
+        .then((saved) => {
+          if (saved) setProjects((prev) => [saved, ...prev]);
+        })
+        .catch((error) => {
+          console.error('[createProject]', error);
+          toast.error(error instanceof Error ? error.message : 'Failed to save project.');
+        });
+
+      return true;
+    } finally {
+      isCreatingProjectRef.current = false;
+    }
   };
 
   const setHeroCharRef = (element: HTMLSpanElement | null, index: number) => {
