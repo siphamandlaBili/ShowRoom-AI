@@ -51,6 +51,19 @@ export default [
     },
   },
   {
+    files: ['lib/puter.worker.js'],
+    languageOptions: {
+      globals: {
+        Response: 'readonly',
+        Request: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        router: 'readonly',
+        Headers: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       globals: {
